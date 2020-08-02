@@ -15,7 +15,10 @@ class User(UserMixin. db.Model):
         return '<User {}>'.format(self.username)
 
     def set_password(self, password):
-        pass
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 class Post(db.Model):
     id = db.Column(db.Interger, primary_key=True)
     body = db.Column(db.String(140))
@@ -27,3 +30,15 @@ class Post(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+class Categoria(db.Model):
+    id = db.Column(db.Interger, primary_key=True)
+    nombre = db.Column(db.String(64), index=True)
+    producto = db.relationship('Producto', backref='product', lazy='dynamic')
+
+class Producto(db.Model):
+    id = db.Column(db.Interger, primary_key=True)
+    nombre = db.Column(db.String(100), index=True)
+    stock = db.Column(db.Interger)
+    precio = db.Column(db.Numeric(10,2))
+    categoria_id = db.Column(db.Interger, db.ForeignKey('categoria.id'))
